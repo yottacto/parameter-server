@@ -1,6 +1,6 @@
 import argparse
 import sys
-from dataset import dataset
+import dataset
 import tensorflow as tf
 
 FLAGS = None
