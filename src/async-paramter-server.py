@@ -9,7 +9,7 @@ import ray
 import model
 import dataset
 
-parser = argparse.ArgumentParser(description="Run the asynchronous parameter " "server example.")
+parser = argparse.ArgumentParser(description="Run the asynchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int,
                     help="The number of workers to use.")
 parser.add_argument("--redis-address", default=None, type=str,

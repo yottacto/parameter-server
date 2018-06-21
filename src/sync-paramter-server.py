@@ -8,7 +8,7 @@ import numpy as np
 import ray
 import model
 
-parser = argparse.ArgumentParser(description="Run the synchronous parameter " "server example.")
+parser = argparse.ArgumentParser(description="Run the synchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int, help="The number of workers to use.")
 parser.add_argument("--redis-address", default=None, type=str, help="The Redis address of the cluster.")
 
