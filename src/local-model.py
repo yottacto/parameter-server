@@ -8,6 +8,7 @@ if __name__ == "__main__":
 
     # Create a parameter server.
     net = model.simple()
+    # net = model.multilayer_perceptron()
 
     # Download MNIST.
     ds = model.load_data()
@@ -16,7 +17,7 @@ if __name__ == "__main__":
     while True:
         # Compute and apply gradients.
         xs, ys = ds.train.next_batch(100)
-        net.sess.run(net.train_step, feed_dict={net.x: xs, net.y_: ys})
+        net.sess.run(net.train_step, feed_dict={net.x: xs, net.y: ys})
 
         if ds.train.epochs_completed != epoch:
             # Evaluate the current model.
