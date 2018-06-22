@@ -7,6 +7,7 @@ import numpy as np
 
 import ray
 import model
+import time
 
 parser = argparse.ArgumentParser(description="Run the synchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int, help="The number of workers to use.")
@@ -58,6 +59,8 @@ if __name__ == "__main__":
 
     i = 0
     current_weights = ps.get_weights.remote()
+    tot_start = time.time()
+    iteration_start = tot_start
     while i < 300:
         print("i = {}".format(i))
         # Compute and apply gradients.
@@ -65,11 +68,14 @@ if __name__ == "__main__":
                      for worker in workers]
         current_weights = ps.apply_gradients.remote(*gradients)
 
-        if i % 1 == 0:
+        if i % 10 == 0:
             # Evaluate the current model.
             net.variables.set_flat(ray.get(current_weights))
             test_xs, test_ys = ds.test.next_batch(ds.test.num_examples)
             accuracy = net.compute_accuracy(test_xs, test_ys)
-            print("Iteration {}: accuracy is {}".format(i, accuracy))
+            print("Iteration {}: accuracy is {}, time is {}s".format(i, accuracy, time.time() - iteration_start))
+            iteration_start = time.time()
             i += 1
+
+    print("tot time is {}s".format(time.time() - tot_start))
 
