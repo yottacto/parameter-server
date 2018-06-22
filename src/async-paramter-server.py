@@ -11,6 +11,8 @@ import model
 parser = argparse.ArgumentParser(description="Run the asynchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int,
                     help="The number of workers to use.")
+parser.add_argument("--batch-size", default=64, type=int,
+                    help="Batch size.")
 parser.add_argument("--redis-address", default=None, type=str,
                     help="The Redis address of the cluster.")
 
@@ -32,7 +34,7 @@ class ParameterServer(object):
 
 
 @ray.remote
-def worker_task(ps, worker_index, batch_size=50):
+def worker_task(ps, worker_index, num_workers, batch_size=64):
     # Download ds.
     ds = model.load_data()
 
@@ -51,6 +53,31 @@ def worker_task(ps, worker_index, batch_size=50):
         ps.push.remote(keys, gradients)
 
 
+@ray.remote
+def split_batch_worker_task(ps, worker_index, num_workers, batch_size=64):
+    # Download ds.
+    ds = model.load_data()
+
+    # Initialize the model.
+    net = model.simple()
+    keys = net.get_weights()[0]
+    block_size = batch_size // num_workers
+    start = worker_index * block_size
+    end = batch_size if worker_index == num_workers - 1 else start + block_size
+
+    while True:
+        # Get the current weights from the parameter server.
+        weights = ray.get(ps.pull.remote(keys))
+        net.set_weights(keys, weights)
+
+        # Compute an update and push it to the parameter server.
+        xs, ys = ds.train.next_batch(batch_size)
+        xs = xs[start : end]
+        ys = ys[start : end]
+        gradients = net.compute_update(xs, ys)
+        ps.push.remote(keys, gradients)
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
@@ -62,7 +89,9 @@ if __name__ == "__main__":
     ps = ParameterServer.remote(all_keys, all_values)
 
     # Start some training tasks.
-    worker_tasks = [worker_task.remote(ps, i) for i in range(args.num_workers)]
+    batch_size = args.batch_size
+    worker_tasks = [worker_task.remote(ps, i, args.num_workers, batch_size)
+            for i in range(args.num_workers)]
 
     # Download ds.
     ds = model.load_data()
