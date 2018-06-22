@@ -73,4 +73,5 @@ if __name__ == "__main__":
             print("Epoch {}: accuracy is {}".format(epoch, accuracy))
             epoch += 1
         i += 50
+        print("i = {}".format(i))
 
