@@ -12,3 +12,17 @@
 | link:src/local.py[async-parameter-server.py] | a asynchronous parameter server example
 |====
 
+== Prepare dataset
+
+Extract `pubmed.feature` and `pubmed.label` from link:data/pubmed.7z[pubmed.7z] to same directory (in link:data/[data/]), you can do like:
+
+    7z x pubmed.7z
+
+Then, run link:data/generate-bin.py[generate-bin.py]:
+
+    python generate-bin.py
+
+Last, copy the whole `data/` directory to `/usr/local`:
+
+    sudo cp -r data /usr/local/
+
