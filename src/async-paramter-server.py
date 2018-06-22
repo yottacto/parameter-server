@@ -69,7 +69,7 @@ if __name__ == "__main__":
     ds = model.load_data()
 
     i = 0
-    while True:
+    while i < 5:
         # Get and evaluate the current model.
         current_weights = ray.get(ps.pull.remote(all_keys))
         net.set_weights(all_keys, current_weights)

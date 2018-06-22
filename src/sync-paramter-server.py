@@ -57,21 +57,19 @@ if __name__ == "__main__":
     ds = model.load_data()
 
     i = 0
-    epoch = 0
     current_weights = ps.get_weights.remote()
-    while True:
+    while i < 300:
+        print("i = {}".format(i))
         # Compute and apply gradients.
         gradients = [worker.compute_gradients.remote(current_weights)
                      for worker in workers]
         current_weights = ps.apply_gradients.remote(*gradients)
 
-        if i // ds.train.num_examples == epoch:
+        if i % 1 == 0:
             # Evaluate the current model.
             net.variables.set_flat(ray.get(current_weights))
             test_xs, test_ys = ds.test.next_batch(ds.test.num_examples)
             accuracy = net.compute_accuracy(test_xs, test_ys)
-            print("Epoch {}: accuracy is {}".format(epoch, accuracy))
-            epoch += 1
-        i += 50
-        print("i = {}".format(i))
+            print("Iteration {}: accuracy is {}".format(i, accuracy))
+            i += 1
 
