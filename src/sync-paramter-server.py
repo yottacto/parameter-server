@@ -62,7 +62,6 @@ if __name__ == "__main__":
     tot_start = time.time()
     iteration_start = tot_start
     while i < 300:
-        print("i = {}".format(i))
         # Compute and apply gradients.
         gradients = [worker.compute_gradients.remote(current_weights)
                      for worker in workers]
@@ -75,7 +74,8 @@ if __name__ == "__main__":
             accuracy = net.compute_accuracy(test_xs, test_ys)
             print("Iteration {}: accuracy is {}, time is {}s".format(i, accuracy, time.time() - iteration_start))
             iteration_start = time.time()
-            i += 1
+
+        i += 1
 
     print("tot time is {}s".format(time.time() - tot_start))
 
