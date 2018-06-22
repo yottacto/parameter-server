@@ -1,6 +1,6 @@
 == Parameter Server (in Ray)
 
-== Files
+== Files (in link:src/[src/])
 
 [cols="^.^1, ^.^2", options="header"]
 |====
