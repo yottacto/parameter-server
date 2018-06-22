@@ -10,7 +10,7 @@ import ray
 import tensorflow as tf
 import dataset
 
-def load_data(data_dir="../data/"):
+def load_data(data_dir="/usr/local/data/"):
     return dataset.read_data_sets(data_dir)
 
 class simple(object):
