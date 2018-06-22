@@ -5,6 +5,7 @@
 [cols="^.^1, ^.^2", options="header"]
 |====
 | file                                         | description
+| link:src/servers.py[servers.py]              | simple script to show active nodes and corresponding ips
 | link:src/local.py[local.py]                  | simple network on local machine
 | link:src/local.py[model.py]                  | provide network models, currently implemented a simple network
 | link:src/local.py[local-model.py]            | simple network using `model.py` on local machine

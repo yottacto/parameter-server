@@ -3,7 +3,7 @@ import ray
 import argparse
 
 parser = argparse.ArgumentParser(description="List all nodes.")
-parser.add_argument("--num-workers", default=8, type=int, help="The number of workers to use.")
+parser.add_argument("--num-workers", default=1000, type=int, help="The number of workers to use.")
 parser.add_argument("--redis-address", default=None, type=str, help="The Redis address of the cluster.")
 
 @ray.remote
