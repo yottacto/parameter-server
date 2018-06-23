@@ -18,7 +18,7 @@ parser.add_argument("--redis-address", default=None, type=str, help="The Redis a
 @ray.remote
 class ParameterServer(object):
     def __init__(self, learning_rate):
-        self.net = model.simple(learning_rate=learning_rate)
+        self.net = model.multilayer_perceptron(learning_rate=learning_rate)
 
     def apply_gradients(self, *gradients):
         self.net.apply_gradients(np.mean(gradients, axis=0))
@@ -30,13 +30,13 @@ class ParameterServer(object):
 
 @ray.remote
 class Worker(object):
-    def __init__(self, worker_index, num_workers, batch_size=64):
+    def __init__(self, worker_index, num_workers, batch_size=64, learning_rate=1e-4):
         self.worker_index = worker_index
         self.num_workers  = num_workers
         self.batch_size   = batch_size
         self.block_size   = batch_size // num_workers
         self.ds           = model.load_data()
-        self.net          = model.simple()
+        self.net          = model.multilayer_perceptron(learning_rate)
 
     def compute_gradients(self, weights):
         self.net.variables.set_flat(weights)
@@ -46,7 +46,7 @@ class Worker(object):
 
 @ray.remote
 class SplitBatchWorker(object):
-    def __init__(self, worker_index, num_workers, batch_size=64):
+    def __init__(self, worker_index, num_workers, batch_size=64, learning_rate=1e-4):
         self.worker_index = worker_index
         self.num_workers  = num_workers
         self.batch_size   = batch_size
@@ -54,7 +54,7 @@ class SplitBatchWorker(object):
         self.start        = self.worker_index * self.block_size
         self.end          = self.batch_size if self.worker_index == self.num_workers - 1 else self.start + self.block_size
         self.ds           = model.load_data()
-        self.net          = model.simple()
+        self.net          = model.multilayer_perceptron(learning_rate)
 
     def compute_gradients(self, weights):
         self.net.variables.set_flat(weights)
@@ -69,15 +69,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    learning_rate = 1e-4
+
     ray.init(redis_address=args.redis_address)
 
     # Create a parameter server.
-    net = model.simple()
-    ps = ParameterServer.remote(1e-4 * args.num_workers)
+    net = model.multilayer_perceptron()
+    # ps = ParameterServer.remote(1e-4 * args.num_workers)
+    ps = ParameterServer.remote(learning_rate)
 
     # Create workers.
     batch_size = args.batch_size
-    workers = [SplitBatchWorker.remote(worker_index, args.num_workers, batch_size)
+    workers = [SplitBatchWorker.remote(worker_index, args.num_workers, batch_size, learning_rate)
             for worker_index in range(args.num_workers)]
 
     # Download Data.
@@ -87,7 +90,7 @@ if __name__ == "__main__":
     current_weights = ps.get_weights.remote()
 
     epoch = 0
-    while epoch <= 10:
+    while True:
         # Compute and apply gradients.
         gradients = [worker.compute_gradients.remote(current_weights)
                 for worker in workers]
@@ -106,6 +109,9 @@ if __name__ == "__main__":
             else:
                 print("Epoch {}: accuracy is {}, time is {}s".format
                         (epoch, accuracy, time.time() - iteration_start))
+
+                if accuracy > 0.9:
+                    break
 
             iteration_start = time.time()
             epoch = i * batch_size // ds.train.num_examples
