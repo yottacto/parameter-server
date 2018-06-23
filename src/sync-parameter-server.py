@@ -65,6 +65,8 @@ class SplitBatchWorker(object):
 
 
 if __name__ == "__main__":
+    preparation_start = time.time()
+
     args = parser.parse_args()
 
     ray.init(redis_address=args.redis_address)
@@ -100,6 +102,7 @@ if __name__ == "__main__":
             if epoch == 0:
                 tot_start = time.time()
                 iteration_start = tot_start
+                print("Preparation time is {}s".format(time.time() - preparation_start))
             else:
                 print("Epoch {}: accuracy is {}, time is {}s".format
                         (epoch, accuracy, time.time() - iteration_start))
