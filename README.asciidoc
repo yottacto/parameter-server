@@ -15,7 +15,7 @@
 
 == Prepare dataset
 
-The dataset must be put in `/usr/local/data/` in every machines.
+The dataset must be put in `/usr/local/data/` on every machines.
 
 First, extract `pubmed.feature` and `pubmed.label` from link:data/pubmed.7z[pubmed.7z] to same directory link:data/[data/], e.g.:
 
