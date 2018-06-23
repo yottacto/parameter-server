@@ -83,10 +83,9 @@ if __name__ == "__main__":
 
     i = 0
     current_weights = ps.get_weights.remote()
-    tot_start = time.time()
-    iteration_start = tot_start
+
     epoch = 0
-    while epoch < 10:
+    while epoch <= 10:
         # Compute and apply gradients.
         gradients = [worker.compute_gradients.remote(current_weights)
                 for worker in workers]
@@ -97,7 +96,14 @@ if __name__ == "__main__":
             net.variables.set_flat(ray.get(current_weights))
             test_xs, test_ys = ds.test.next_batch(ds.test.num_examples)
             accuracy = net.compute_accuracy(test_xs, test_ys)
-            print("Epoch {}: accuracy is {}, time is {}s".format(epoch, accuracy, time.time() - iteration_start))
+
+            if epoch == 0:
+                tot_start = time.time()
+                iteration_start = tot_start
+            else:
+                print("Epoch {}: accuracy is {}, time is {}s".format
+                        (epoch, accuracy, time.time() - iteration_start))
+
             iteration_start = time.time()
             epoch = i * batch_size // ds.train.num_examples
 

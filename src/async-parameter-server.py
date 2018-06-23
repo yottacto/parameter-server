@@ -97,15 +97,20 @@ if __name__ == "__main__":
     ds = model.load_data()
 
     i = 0
-    tot_start = time.time()
-    iteration_start = tot_start
-    while i < 5:
+    while i <= 10:
         # Get and evaluate the current model.
         current_weights = ray.get(ps.pull.remote(all_keys))
         net.set_weights(all_keys, current_weights)
         test_xs, test_ys = ds.test.next_batch(1000)
         accuracy = net.compute_accuracy(test_xs, test_ys)
-        print("Iteration {}: accuracy is {}, time is {}s".format(i, accuracy, time.time() - iteration_start))
+
+        if i == 0:
+            tot_start = time.time()
+            iteration_start = tot_start
+        else:
+            print("Iteration {}: accuracy is {}, time is {}s".format
+                    (i, accuracy, time.time() - iteration_start))
+
         i += 1
         time.sleep(1)
         iteration_start = time.time()
