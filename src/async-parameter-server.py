@@ -41,7 +41,6 @@ def worker_task(ps, worker_index, num_workers, batch_size=64):
     # Initialize the model.
     net = model.simple()
     keys = net.get_weights()[0]
-
     while True:
         # Get the current weights from the parameter server.
         weights = ray.get(ps.pull.remote(keys))

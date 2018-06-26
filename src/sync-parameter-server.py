@@ -9,6 +9,8 @@ import ray
 import model
 import time
 
+selected_model = model.simple_cnn
+
 parser = argparse.ArgumentParser(description="Run the synchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int, help="The number of workers to use.")
 parser.add_argument("--batch-size", default=64, type=int, help="Batch size.")
@@ -18,7 +20,7 @@ parser.add_argument("--redis-address", default=None, type=str, help="The Redis a
 @ray.remote
 class ParameterServer(object):
     def __init__(self, learning_rate):
-        self.net = model.three_layer_perceptron(learning_rate=learning_rate)
+        self.net = selected_model(learning_rate=learning_rate)
 
     def apply_gradients(self, *gradients):
         self.net.apply_gradients(np.mean(gradients, axis=0))
@@ -36,7 +38,7 @@ class Worker(object):
         self.batch_size   = batch_size
         self.block_size   = batch_size // num_workers
         self.ds           = model.load_data()
-        self.net          = model.three_layer_perceptron(learning_rate)
+        self.net          = selected_model(learning_rate)
 
     def compute_gradients(self, weights):
         self.net.variables.set_flat(weights)
@@ -54,7 +56,7 @@ class SplitBatchWorker(object):
         self.start        = self.worker_index * self.block_size
         self.end          = self.batch_size if self.worker_index == self.num_workers - 1 else self.start + self.block_size
         self.ds           = model.load_data()
-        self.net          = model.three_layer_perceptron(learning_rate)
+        self.net          = selected_model(learning_rate)
 
     def compute_gradients(self, weights):
         self.net.variables.set_flat(weights)
@@ -74,7 +76,7 @@ if __name__ == "__main__":
     ray.init(redis_address=args.redis_address)
 
     # Create a parameter server.
-    net = model.three_layer_perceptron()
+    net = selected_model()
     # ps = ParameterServer.remote(1e-4 * args.num_workers)
     ps = ParameterServer.remote(learning_rate)
 
