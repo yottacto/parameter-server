@@ -17,7 +17,9 @@ if __name__ == "__main__":
     ray.init(redis_address=args.redis_address)
 
     # Get a list of the IP addresses of the nodes that have joined the cluster.
-    all_nodes = set(ray.get([f.remote() for _ in range(args.num_workers)]))
-    print("There are {} nodes.".format(len(all_nodes)))
-    print("IP addresses are {}.".format(all_nodes))
+    while True:
+        all_nodes = set(ray.get([f.remote() for _ in range(args.num_workers)]))
+        print("There are {} nodes.".format(len(all_nodes)))
+        print("IP addresses are {}.".format(all_nodes))
+        time.sleep(2)
 
