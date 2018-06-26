@@ -65,9 +65,9 @@ def read_data_sets(data_dir, fake_data=False, dtype=dtypes.float64):
     tot = all_features.shape[0]
     assert tot == all_labels.shape[0], "train features' number of items doesn't match with labels'"
 
-    num_training = tot // 5 * 3
-    num_validation = tot // 5 * 1
-    num_test = tot - num_training - num_validation
+    num_training   = tot // 2
+    num_validation = tot // 4
+    num_test       = tot - num_training - num_validation
 
     mask = range(num_training)
     train_features = all_features[mask]

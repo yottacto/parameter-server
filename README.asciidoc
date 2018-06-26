@@ -11,6 +11,7 @@
 | link:src/local-model.py[local-model.py]                       | simple network using `model.py` on local machine
 | link:src/sync-parameter-server.py[sync-parameter-server.py]   | a synchronous parameter server example
 | link:src/async-parameter-server.py[async-parameter-server.py] | a asynchronous parameter server example
+| link:src/bounded-delay-async-parameter-server.py[bounded-delay-async-parameter-server.py] | a bounded delay asynchronous parameter server example
 |====
 
 == Prepare dataset
