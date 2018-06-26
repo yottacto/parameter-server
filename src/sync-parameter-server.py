@@ -9,8 +9,8 @@ import ray
 import model
 import time
 
-# selected_model = model.three_layer_perceptron
-selected_model = model.multilayer_perceptron
+selected_model = model.three_layer_perceptron
+# selected_model = model.multilayer_perceptron
 
 parser = argparse.ArgumentParser(description="Run the synchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int, help="The number of workers to use.")

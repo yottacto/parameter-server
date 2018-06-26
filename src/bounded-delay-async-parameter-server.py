@@ -8,6 +8,10 @@ import time
 import ray
 import model
 
+
+selected_model = model.three_layer_perceptron
+
+
 parser = argparse.ArgumentParser(description="Run the asynchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int,
                     help="The number of workers to use.")
@@ -47,7 +51,7 @@ def worker_task(ps, worker_index, num_workers, batch_size=64):
     ds = model.load_data()
 
     # Initialize the model.
-    net = model.simple()
+    net = selected_model()
     keys = net.get_weights()[0]
 
     worker_iter = 0
@@ -74,7 +78,7 @@ def split_batch_worker_task(ps, worker_index, num_workers, batch_size=64):
     ds = model.load_data()
 
     # Initialize the model.
-    net = model.simple()
+    net = selected_model()
     keys = net.get_weights()[0]
     block_size = batch_size // num_workers
     start = worker_index * block_size
@@ -108,7 +112,7 @@ if __name__ == "__main__":
     ray.init(redis_address=args.redis_address)
 
     # Create a parameter server with some random weights.
-    net = model.simple()
+    net = selected_model()
     all_keys, all_values = net.get_weights()
     ps = ParameterServer.remote(all_keys, all_values)
 
