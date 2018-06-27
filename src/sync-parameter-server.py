@@ -14,7 +14,7 @@ selected_model = model.three_layer_perceptron
 
 parser = argparse.ArgumentParser(description="Run the synchronous parameter server example.")
 parser.add_argument("--num-workers", default=4, type=int, help="The number of workers to use.")
-parser.add_argument("--batch-size", default=64, type=int, help="Batch size.")
+parser.add_argument("--batch-size", default=256, type=int, help="Batch size.")
 parser.add_argument("--redis-address", default=None, type=str, help="The Redis address of the cluster.")
 
 
@@ -33,7 +33,7 @@ class ParameterServer(object):
 
 @ray.remote
 class Worker(object):
-    def __init__(self, worker_index, num_workers, batch_size=64, learning_rate=1e-4):
+    def __init__(self, worker_index, num_workers, batch_size=256, learning_rate=1e-4):
         self.worker_index = worker_index
         self.num_workers  = num_workers
         self.batch_size   = batch_size
@@ -49,7 +49,7 @@ class Worker(object):
 
 @ray.remote
 class SplitBatchWorker(object):
-    def __init__(self, worker_index, num_workers, batch_size=64, learning_rate=1e-4):
+    def __init__(self, worker_index, num_workers, batch_size=256, learning_rate=1e-4):
         self.worker_index = worker_index
         self.num_workers  = num_workers
         self.batch_size   = batch_size
@@ -104,6 +104,7 @@ if __name__ == "__main__":
             net.variables.set_flat(ray.get(current_weights))
             test_xs, test_ys = ds.test.next_batch(ds.test.num_examples)
             accuracy = net.compute_accuracy(test_xs, test_ys)
+            confusion = net.compute_confusion(test_xs, test_ys)
 
             if epoch == 0:
                 tot_start = time.time()
@@ -111,9 +112,11 @@ if __name__ == "__main__":
                 print("Preparation time is {}s".format(time.time() - preparation_start))
             else:
                 print("Epoch {}: accuracy is {}, time is {}s".format
-                        (epoch, accuracy, time.time() - iteration_start))
+                        (epoch, model.accuracy_from_confusion(confusion),
+                            time.time() - iteration_start))
 
-                if accuracy > 0.9:
+                print("Confusion matrix is:\n{}\n".format(confusion))
+                if accuracy > 0.71:
                     break
 
             iteration_start = time.time()
